@@ -67,18 +67,18 @@ export default function Login() {
                 <HiOutlineDocumentText className="w-6 h-6" />
               </div>
               <div>
-                <h1 className="text-lg font-bold tracking-tight m-0 leading-tight">{APP_NAME}</h1>
-                <p className="text-xs text-blue-100/80 m-0 mt-0.5">Billing Management System</p>
+                <h1 className="text-lg font-bold tracking-tight m-0 text-white leading-tight">{APP_NAME}</h1>
+                {/* <p className="text-xs text-blue-100/80 m-0 mt-0.5">Billing Management System</p> */}
               </div>
             </motion.div>
           </div>
 
-          <div className="my-auto py-10">
+          <div className="">
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15, duration: 0.5 }}
-              className="text-3xl xl:text-4xl font-bold leading-tight m-0 max-w-md"
+              className=" font-bold leading-tight m-0 max-w-md text-white"
             >
               Manage invoices smarter, grow faster
             </motion.h2>
@@ -203,7 +203,7 @@ export default function Login() {
                 </Link>
               </div>
 
-              <Button type="submit" className="w-full py-2.5 text-sm font-semibold" loading={loading}>
+              <Button type="submit" className="w-full text-sm font-semibold" loading={loading}>
                 Sign in
               </Button>
             </form>
