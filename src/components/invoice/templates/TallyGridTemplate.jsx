@@ -140,7 +140,8 @@ export default function TallyGridTemplate({ invoice, settings }) {
               <p style={xs}>A/c No: {settings.bankAccount}</p>
               <p style={xs}>Branch & IFSC: {settings.bankBranch} {settings.bankIFSC}</p>
               <div style={{ marginTop: '24px', textAlign: 'right' }}>
-                {settings.signature && <img src={settings.signature} alt="Sign" style={{ height: '40px', objectFit: 'contain', marginLeft: 'auto', display: 'block' }} crossOrigin="anonymous" />}
+                {settings.signature && <img src={settings.signature} alt="Sign" style={{ height: '80px', objectFit: 'contain', marginLeft: 'auto', display: 'block' }} crossOrigin="anonymous" />}
+                
                 <p style={{ ...label, margin: '4px 0 0' }}>Authorised Signatory</p>
                 <p style={xs}>for {settings.companyName}</p>
               </div>

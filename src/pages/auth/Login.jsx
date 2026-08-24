@@ -77,13 +77,15 @@ export default function Login() {
   
           {/* Heading */}
           <div className="mb-7 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 m-0">
-              Welcome back
-            </h2>
+           
   
-            <p className="text-gray-500 text-sm mt-2 m-0">
-              Sign in to your account to continue
+            <p className="text-gray-500 fs-6 text-sm mt-2 m-0">
+             Rajlakshami Fruite and Vegetable Suppliers
             </p>
+
+             <h2 className="text-2xl font-bold text-gray-900 m-0">
+             Login
+            </h2>
           </div>
   
           {/* Error */}

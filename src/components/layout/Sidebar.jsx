@@ -78,8 +78,8 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
   const content = (
     <aside className={`h-full flex flex-col app-surface border-r app-border sidebar-transition ${sidebarCollapsed ? 'w-[68px]' : 'w-60'}`}>
       <div className={`flex items-center h-14 min-h-14 px-4 border-b app-border shrink-0 ${sidebarCollapsed ? 'justify-center px-2' : 'gap-2.5'}`}>
-        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center flex-shrink-0 shadow-sm">
-          <img src="/logo.png" alt="" className="w-7 h-7 object-contain" />
+        <div className="w-8 h-8 rounded-xl  flex items-center justify-center flex-shrink-0 shadow-sm rounded-5">
+          <img src="/logo.png" alt="" className="w-9 h-9 object-contain" />
         </div>
         {!sidebarCollapsed && (
           <h5 className="m-0 p-0 font-bold text-base truncate app-text">{APP_NAME}</h5>
