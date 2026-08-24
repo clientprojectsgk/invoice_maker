@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash } from 'react-icons/hi';
+import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineEye } from 'react-icons/hi';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { useApp } from '../context/AppContext';
 import { useSort, useFilter, usePagination } from '../hooks/useTable';
@@ -17,6 +18,7 @@ import { formatPhone, formatDate } from '../utils/formatters';
 
 export default function Suppliers() {
   const { suppliers, addSupplier, updateSupplier, deleteSupplier } = useApp();
+  const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
@@ -39,7 +41,7 @@ export default function Suppliers() {
   };
 
   const columns = [
-    { key: 'name', label: 'Name', sortable: true, render: (r) => <span className="font-medium">{r.name}</span> },
+    { key: 'name', label: 'Name', sortable: true, render: (r) => <button onClick={() => navigate(`/suppliers/${r.id}`)} className="font-medium text-primary-600 hover:underline text-left">{r.name}</button> },
     { key: 'phone', label: 'Phone', render: (r) => formatPhone(r.phone) },
     { key: 'email', label: 'Email' },
     { key: 'gst', label: 'GST' },
@@ -48,8 +50,9 @@ export default function Suppliers() {
     {
       key: 'actions', label: 'Actions', render: (r) => (
         <div className="flex gap-1">
-          <button onClick={() => openEdit(r)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><HiOutlinePencil className="w-4 h-4" /></button>
-          <button onClick={() => handleDelete(r.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-red-500"><HiOutlineTrash className="w-4 h-4" /></button>
+          <button onClick={() => navigate(`/suppliers/${r.id}`)} className="p-1.5 rounded-lg hover:bg-blue-50 text-blue-600" title="View Profile"><HiOutlineEye className="w-4 h-4" /></button>
+          <button onClick={() => openEdit(r)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500" title="Edit"><HiOutlinePencil className="w-4 h-4" /></button>
+          <button onClick={() => handleDelete(r.id)} className="p-1.5 rounded-lg hover:bg-red-50 text-red-500" title="Delete"><HiOutlineTrash className="w-4 h-4" /></button>
         </div>
       ),
     },

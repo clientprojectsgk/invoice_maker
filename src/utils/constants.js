@@ -1,13 +1,27 @@
-export const APP_NAME = 'Raj Lakshmi Fruit Suppliers';
+export const APP_NAME = 'Raj Lakshmi';
 export const PRIMARY_COLOR = '#1a5fb8';
 
 export const INVOICE_STATUSES = [
   { value: 'draft', label: 'Draft', color: 'bg-slate-100 text-slate-700' },
+  { value: 'confirmed', label: 'Confirmed', color: 'bg-blue-100 text-blue-700' },
   { value: 'sent', label: 'Sent', color: 'bg-blue-100 text-blue-700' },
   { value: 'paid', label: 'Paid', color: 'bg-emerald-100 text-emerald-700' },
-  { value: 'partial', label: 'Partial', color: 'bg-amber-100 text-amber-700' },
+  { value: 'partial', label: 'Partially Paid', color: 'bg-amber-100 text-amber-700' },
   { value: 'overdue', label: 'Overdue', color: 'bg-red-100 text-red-700' },
   { value: 'cancelled', label: 'Cancelled', color: 'bg-gray-100 text-gray-500' },
+];
+
+export const PAYMENT_MODES = [
+  { value: 'cash', label: 'Cash' },
+  { value: 'upi', label: 'UPI' },
+  { value: 'bank', label: 'Bank Transfer' },
+  { value: 'cheque', label: 'Cheque' },
+  { value: 'other', label: 'Other' },
+];
+
+export const PURCHASE_STATUSES = [
+  { value: 'confirmed', label: 'Confirmed' },
+  { value: 'cancelled', label: 'Cancelled' },
 ];
 
 export const PAYMENT_STATUSES = [
@@ -40,12 +54,17 @@ export const ROLES = {
 
 export const NAV_ITEMS = [
   { path: '/dashboard', label: 'Dashboard', icon: 'HiOutlineViewGrid' },
+  { path: '/purchases', label: 'Purchases', icon: 'HiOutlineShoppingCart' },
+  { path: '/stock', label: 'Stock', icon: 'HiOutlineArchive' },
   { path: '/invoices', label: 'Invoices', icon: 'HiOutlineDocumentText' },
   { path: '/invoices/create', label: 'Create Invoice', icon: 'HiOutlinePlusCircle' },
+  { path: '/customer-payments', label: 'Receive Payment', icon: 'HiOutlineCash' },
   { path: '/customers', label: 'Customers', icon: 'HiOutlineUserGroup' },
-  { path: '/suppliers', label: 'Suppliers', icon: 'HiOutlineTruck' },
+  { path: '/receivables', label: 'Receivables', icon: 'HiOutlineClipboardList' },
+  { path: '/suppliers', label: 'Suppliers/Farmers', icon: 'HiOutlineTruck' },
+  { path: '/supplier-payments', label: 'Supplier Payments', icon: 'HiOutlineCreditCard' },
+  { path: '/payables', label: 'Payables', icon: 'HiOutlineExclamation' },
   { path: '/products', label: 'Products', icon: 'HiOutlineCube' },
-  { path: '/bills', label: 'Bills', icon: 'HiOutlineReceiptRefund' },
   { path: '/reports', label: 'Reports', icon: 'HiOutlineChartBar' },
   { path: '/settings', label: 'Settings', icon: 'HiOutlineCog' },
 ];

@@ -82,9 +82,9 @@ export default function Navbar({ onMenuClick, breadcrumb }) {
             {darkMode ? <HiOutlineSun className="w-[18px] h-[18px] text-amber-400" /> : <HiOutlineMoon className="w-[18px] h-[18px]" />}
           </button>
 
-          <button type="button" className="relative flex items-center justify-center w-9 h-9 rounded-xl hover-surface app-text-muted transition-colors">
+          {/* <button type="button" className="relative flex items-center justify-center w-9 h-9 rounded-xl hover-surface app-text-muted transition-colors">
             <HiOutlineBell className="w-[18px] h-[18px]" />
-          </button>
+          </button> */}
 
           <div className="relative ml-1" ref={profileRef}>
             <button type="button" onClick={() => setProfileOpen(!profileOpen)} className="flex items-center gap-2 h-9 pl-1 pr-2.5 rounded-xl hover-surface border border-transparent hover:border-[var(--app-border)] transition-colors">

@@ -45,6 +45,9 @@ export function StatusBadge({ status }) {
     active: 'bg-green-50 text-green-700 dark:bg-green-900/40 dark:text-green-300',
     inactive: 'bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400',
     pending: 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
+    confirmed: 'bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+    unpaid: 'bg-red-50 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+    advance: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300',
   };
   return (
     <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium capitalize ${styles[status] || styles.draft}`}>
