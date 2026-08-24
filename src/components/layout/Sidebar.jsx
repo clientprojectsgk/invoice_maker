@@ -5,7 +5,7 @@ import {
   HiOutlineUserGroup, HiOutlineTruck, HiOutlineCube,
   HiOutlineChartBar, HiOutlineCog, HiOutlineChevronLeft, HiOutlineChevronRight,
   HiOutlineShoppingCart, HiOutlineArchive, HiOutlineCash, HiOutlineCreditCard,
-  HiOutlineClipboardList, HiOutlineChevronDown, HiOutlineChevronUp,
+  HiOutlineClipboardList, HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineUsers,
 } from 'react-icons/hi';
 import { useTheme } from '../../context/ThemeContext';
 import { APP_NAME } from '../../utils/constants';
@@ -50,6 +50,7 @@ const NAV = [
     ],
   },
   { path: '/reports', label: 'Reports', icon: HiOutlineChartBar },
+  { path: '/labours', label: 'Labours', icon: HiOutlineUsers },
   { path: '/settings', label: 'Settings', icon: HiOutlineCog },
 ];
 
@@ -81,7 +82,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
           <img src="/logo.png" alt="" className="w-7 h-7 object-contain" />
         </div>
         {!sidebarCollapsed && (
-          <h5 className="m-0 p-0 font-bold text-danger text-base truncate">{APP_NAME}</h5>
+          <h5 className="m-0 p-0 font-bold text-base truncate app-text">{APP_NAME}</h5>
         )}
       </div>
 

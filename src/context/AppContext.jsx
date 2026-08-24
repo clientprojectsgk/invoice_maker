@@ -51,6 +51,18 @@ export const AppProvider = ({ children }) => {
     const saved = localStorage.getItem('ip_supplier_payments');
     return saved ? JSON.parse(saved) : initialSupplierPayments;
   });
+  const [labours, setLabours] = useState(() => {
+    const saved = localStorage.getItem('ip_labours');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [attendances, setAttendances] = useState(() => {
+    const saved = localStorage.getItem('ip_attendances');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [labourPayments, setLabourPayments] = useState(() => {
+    const saved = localStorage.getItem('ip_labour_payments');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [stockMovements, setStockMovements] = useState(() => {
     const saved = localStorage.getItem('ip_stock_movements');
     return saved ? JSON.parse(saved) : initialStockMovements;
@@ -74,6 +86,9 @@ export const AppProvider = ({ children }) => {
   useEffect(() => { localStorage.setItem('ip_customer_payments', JSON.stringify(customerPayments)); }, [customerPayments]);
   useEffect(() => { localStorage.setItem('ip_supplier_payments', JSON.stringify(supplierPayments)); }, [supplierPayments]);
   useEffect(() => { localStorage.setItem('ip_stock_movements', JSON.stringify(stockMovements)); }, [stockMovements]);
+  useEffect(() => { localStorage.setItem('ip_labours', JSON.stringify(labours)); }, [labours]);
+  useEffect(() => { localStorage.setItem('ip_attendances', JSON.stringify(attendances)); }, [attendances]);
+  useEffect(() => { localStorage.setItem('ip_labour_payments', JSON.stringify(labourPayments)); }, [labourPayments]);
   useEffect(() => { localStorage.setItem('ip_settings', JSON.stringify(settings)); }, [settings]);
   useEffect(() => { localStorage.setItem('ip_activities', JSON.stringify(activities)); }, [activities]);
 
@@ -436,6 +451,76 @@ export const AppProvider = ({ children }) => {
     });
   };
 
+  const addLabour = (data) => {
+    const labour = { ...data, id: generateId(), createdAt: new Date().toISOString() };
+    setLabours((prev) => [labour, ...prev]);
+    addActivity('created', 'labour', labour.id, labour.name);
+    return labour;
+  };
+
+  const updateLabour = (id, data) => {
+    setLabours((prev) => prev.map((l) => (l.id === id ? { ...l, ...data } : l)));
+    addActivity('updated', 'labour', id, data.name);
+  };
+
+  const deleteLabour = (id) => {
+    setLabours((prev) => prev.filter((l) => l.id !== id));
+    addActivity('deleted', 'labour', id);
+  };
+
+  // attendance: status = 'present' | 'absent' | 'half' | 'overtime'
+  const markAttendance = (labourId, date, status, overtimeHours = 0, notes = '') => {
+    setAttendances((prev) => {
+      const existing = prev.findIndex((a) => a.labourId === labourId && a.date === date);
+      const record = { id: generateId(), labourId, date, status, overtimeHours: Number(overtimeHours) || 0, notes, createdAt: new Date().toISOString() };
+      if (existing >= 0) {
+        const updated = [...prev];
+        updated[existing] = { ...prev[existing], ...record, id: prev[existing].id };
+        return updated;
+      }
+      return [...prev, record];
+    });
+  };
+
+  const deleteAttendance = (labourId, date) => {
+    setAttendances((prev) => prev.filter((a) => !(a.labourId === labourId && a.date === date)));
+  };
+
+  const addLabourPayment = (data) => {
+    const payment = { ...data, id: generateId(), createdAt: new Date().toISOString() };
+    setLabourPayments((prev) => [payment, ...prev]);
+    addActivity('created', 'labour_payment', payment.id, data.labourName);
+    return payment;
+  };
+
+  const deleteLabourPayment = (id) => {
+    setLabourPayments((prev) => prev.filter((p) => p.id !== id));
+    addActivity('deleted', 'labour_payment', id);
+  };
+
+  // Compute earned wages for a labour in a date range
+  const getLabourEarnings = (labourId, dateFrom, dateTo) => {
+    const labour = labours.find((l) => l.id === labourId);
+    if (!labour) return { presentDays: 0, halfDays: 0, overtimeHours: 0, earned: 0, paid: 0, balance: 0 };
+    const rate = Number(labour.dailyWage) || 0;
+    const otRate = Number(labour.overtimeRate) || rate / 8;
+    const recs = attendances.filter((a) => {
+      if (a.labourId !== labourId) return false;
+      if (dateFrom && a.date < dateFrom) return false;
+      if (dateTo && a.date > dateTo) return false;
+      return true;
+    });
+    const presentDays = recs.filter((a) => a.status === 'present').length;
+    const halfDays = recs.filter((a) => a.status === 'half').length;
+    const overtimeHours = recs.reduce((s, a) => s + (Number(a.overtimeHours) || 0), 0);
+    const earned = (presentDays * rate) + (halfDays * rate * 0.5) + (overtimeHours * otRate);
+    const paid = labourPayments
+      .filter((p) => p.labourId === labourId)
+      .reduce((s, p) => s + (Number(p.amount) || 0), 0);
+    const balance = Math.max(0, earned - paid);
+    return { presentDays, halfDays, overtimeHours, earned, paid, balance, totalDays: recs.length };
+  };
+
   const addBill = (data) => {
     const bill = { ...data, id: generateId(), createdAt: new Date().toISOString() };
     setBills((prev) => [bill, ...prev]);
@@ -481,6 +566,7 @@ export const AppProvider = ({ children }) => {
   const value = {
     customers, suppliers, products, invoices, bills, purchases,
     customerPayments, supplierPayments, stockMovements,
+    labours, attendances, labourPayments,
     settings, activities, deletedItems,
     addCustomer, updateCustomer, deleteCustomer,
     addSupplier, updateSupplier, deleteSupplier,
@@ -491,6 +577,9 @@ export const AppProvider = ({ children }) => {
     addSupplierPayment, cancelSupplierPayment,
     addStockMovement, adjustStock, checkStockAvailability,
     addBill, updateBill, deleteBill,
+    addLabour, updateLabour, deleteLabour,
+    markAttendance, deleteAttendance,
+    addLabourPayment, deleteLabourPayment, getLabourEarnings,
     setSettings, undoDelete, getDashboardStats, addActivity,
     getCustomerSummary: (id) => getCustomerSummary(id, invoices, customerPayments),
     getSupplierSummary: (id) => getSupplierSummary(id, purchases, supplierPayments),

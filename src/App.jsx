@@ -24,6 +24,8 @@ import PurchasePayments from './pages/PurchasePayments';
 import CustomerPayments from './pages/CustomerPayments';
 import Receivables from './pages/Receivables';
 import Payables from './pages/Payables';
+import Labours from './pages/Labours';
+import LabourDetail from './pages/LabourDetail';
 import Stock from './pages/Stock';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
@@ -58,6 +60,8 @@ export default function App() {
                 <Route path="receivables" element={<Receivables />} />
                 <Route path="payables" element={<Payables />} />
                 <Route path="stock" element={<Stock />} />
+                <Route path="labours" element={<Labours />} />
+                <Route path="labours/:id" element={<LabourDetail />} />
                 <Route path="reports" element={<Reports />} />
                 <Route path="settings" element={<Settings />} />
               </Route>
