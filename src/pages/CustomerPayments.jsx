@@ -151,7 +151,7 @@ export default function CustomerPayments() {
                       <div key={inv.id} className="flex items-center gap-3 text-sm">
                         <div className="flex-1">
                           <span className="font-medium text-primary-600">{inv.invoiceNumber}</span>
-                          <span className="text-slate-500 ml-2">{formatDate(inv.invoiceDate)}</span>
+                          <span className="app-text-muted ml-2">{formatDate(inv.invoiceDate)}</span>
                           <span className="text-amber-600 ml-2">Pending: {formatCurrency(pending)}</span>
                         </div>
                         <Input
@@ -171,7 +171,7 @@ export default function CustomerPayments() {
 
           {form.customerId && pendingInvoices.length === 0 && (
             <div className="col-12">
-              <div className="p-3 rounded-xl bg-indigo-50 text-indigo-700 text-sm">
+              <div className="p-3 rounded-xl border app-border text-sm app-text-muted" style={{backgroundColor:'var(--app-surface-hover)'}}>
                 No pending invoices. This payment will be recorded as an advance.
               </div>
             </div>

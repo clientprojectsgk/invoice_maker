@@ -165,16 +165,13 @@ aside a, header a, .app-breadcrumb a, .sidebar-nav a {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: #f8fafc;
+  background: var(--app-surface);
   font-family: var(--font-display);
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--app-text-muted);
-}
-.dark .table-sticky thead th {
-  background: #151e2e;
 }
 
 input:focus, select:focus, textarea:focus, button:focus-visible {

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { HiOutlinePlus, HiOutlineCash, HiOutlineArrowLeft } from 'react-icons/hi';
 import { useApp } from '../context/AppContext';
-import Card, { CardHeader } from '../components/common/Card';
+import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import DataTable from '../components/common/DataTable';
 import { StatusBadge } from '../components/common/FormField';
@@ -11,6 +11,13 @@ import dayjs from 'dayjs';
 
 const TABS = ['Overview', 'Sales', 'Payments', 'Outstanding', 'Ledger', 'Products'];
 
+const Row = ({ label, value }) => (
+  <div className="flex justify-between gap-2 text-sm">
+    <span className="app-text-muted shrink-0">{label}</span>
+    <span className="text-right">{value || '—'}</span>
+  </div>
+);
+
 export default function CustomerDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -18,7 +25,7 @@ export default function CustomerDetail() {
   const [tab, setTab] = useState('Overview');
 
   const customer = customers.find((c) => c.id === id);
-  if (!customer) return <div className="p-8 text-center text-slate-500">Customer not found. <Link to="/customers" className="text-primary-600">Go back</Link></div>;
+  if (!customer) return <div className="p-8 text-center app-text-muted">Customer not found. <Link to="/customers" className="text-primary-600">Go back</Link></div>;
 
   const summary = getCustomerSummary(id);
   const ledger = getCustomerLedger(id);
@@ -30,7 +37,6 @@ export default function CustomerDetail() {
   const pendingInvoices = custInvoices.filter((i) => getInvoicePending(i) > 0 && i.status !== 'cancelled');
 
   const firstSale = custInvoices.length ? custInvoices.reduce((a, b) => a.invoiceDate < b.invoiceDate ? a : b) : null;
-  const lastSale = summary.lastSale;
   const thisMonth = dayjs().format('YYYY-MM');
   const monthSales = custInvoices.filter((i) => i.invoiceDate?.startsWith(thisMonth)).length;
 
@@ -61,97 +67,85 @@ export default function CustomerDetail() {
     { key: 'balance', label: 'Balance', render: (r) => <span className={`font-semibold ${r.balance > 0 ? 'text-amber-600' : 'text-green-600'}`}>{formatCurrency(r.balance)}</span> },
   ];
 
+  const outstandingColumns = [
+    { key: 'invoiceNumber', label: 'Invoice #', render: (r) => <Link to={`/invoices/${r.id}`} className="font-medium text-primary-600 hover:underline">{r.invoiceNumber}</Link> },
+    { key: 'invoiceDate', label: 'Date', render: (r) => formatDate(r.invoiceDate) },
+    { key: 'totals', label: 'Amount', render: (r) => formatCurrency(r.totals?.grandTotal) },
+    { key: 'pending', label: 'Pending', render: (r) => <span className="font-semibold text-amber-600">{formatCurrency(getInvoicePending(r))}</span> },
+    { key: 'days', label: 'Days', render: (r) => { const d = dayjs().diff(dayjs(r.invoiceDate), 'day'); return <span className={d > 30 ? 'text-red-600 font-medium' : 'app-text-muted'}>{d}d</span>; } },
+    { key: 'status', label: 'Status', render: (r) => <StatusBadge status={computeInvoiceStatus(r)} /> },
+  ];
+
   const productColumns = [
     { key: 'product', label: 'Product' },
     { key: 'qty', label: 'Total Qty', render: (r) => `${r.qty} ${r.unit}` },
     { key: 'sales', label: 'Total Value', render: (r) => formatCurrency(r.sales) },
   ];
 
-  const outstandingColumns = [
-    { key: 'invoiceNumber', label: 'Invoice #', render: (r) => <Link to={`/invoices/${r.id}`} className="font-medium text-primary-600 hover:underline">{r.invoiceNumber}</Link> },
-    { key: 'invoiceDate', label: 'Date', render: (r) => formatDate(r.invoiceDate) },
-    { key: 'dueDate', label: 'Due Date', render: (r) => formatDate(r.dueDate) },
-    { key: 'totals', label: 'Invoice Amount', render: (r) => formatCurrency(r.totals?.grandTotal) },
-    { key: 'pending', label: 'Pending', render: (r) => <span className="font-semibold text-amber-600">{formatCurrency(getInvoicePending(r))}</span> },
-    { key: 'days', label: 'Days Pending', render: (r) => { const d = dayjs().diff(dayjs(r.invoiceDate), 'day'); return <span className={d > 30 ? 'text-red-600 font-medium' : 'text-slate-600'}>{d}d</span>; } },
-    { key: 'status', label: 'Status', render: (r) => <StatusBadge status={computeInvoiceStatus(r)} /> },
-  ];
-
   return (
     <div className="space-y-5">
-      <div className="flex items-center gap-3">
-        <button onClick={() => navigate('/customers')} className="p-2 rounded-lg hover:bg-slate-100 text-slate-500"><HiOutlineArrowLeft className="w-5 h-5" /></button>
-        <div className="flex-1">
+      <div className="flex flex-wrap items-center gap-3">
+        <button onClick={() => navigate('/customers')} className="p-2 rounded-lg hover-surface app-text-muted"><HiOutlineArrowLeft className="w-5 h-5" /></button>
+        <div className="flex-1 min-w-0">
           <h1 className="page-title">{customer.name}</h1>
-          <p className="page-subtitle">{customer.phone} {customer.email ? `· ${customer.email}` : ''}</p>
+          <p className="page-subtitle">{customer.phone}{customer.email ? ` · ${customer.email}` : ''}</p>
         </div>
-        <div className="flex gap-2">
-          <Link to={`/invoices/create?customerId=${id}`}><Button icon={HiOutlinePlus} size="sm">Create Invoice</Button></Link>
-          <Link to={`/customer-payments?customerId=${id}`}><Button icon={HiOutlineCash} size="sm" variant="secondary">Receive Payment</Button></Link>
+        <div className="flex gap-2 flex-wrap">
+          <Link to={`/invoices/create`}><Button icon={HiOutlinePlus} size="sm">Create Invoice</Button></Link>
+          <Link to={`/customer-payments`}><Button icon={HiOutlineCash} size="sm" variant="secondary">Receive Payment</Button></Link>
         </div>
       </div>
 
-      {/* Summary Cards */}
       <div className="row g-3">
-        <div className="col-6 col-md-3">
-          <Card><p className="label-caps">Total Sales</p><p className="kpi-value mt-1">{formatCurrency(summary.totalSales)}</p></Card>
-        </div>
-        <div className="col-6 col-md-3">
-          <Card><p className="label-caps">Total Received</p><p className="kpi-value mt-1 text-green-600">{formatCurrency(summary.totalReceived)}</p></Card>
-        </div>
-        <div className="col-6 col-md-3">
-          <Card><p className="label-caps">Outstanding</p><p className={`kpi-value mt-1 ${summary.totalOutstanding > 0 ? 'text-amber-600' : 'text-green-600'}`}>{formatCurrency(summary.totalOutstanding)}</p></Card>
-        </div>
-        <div className="col-6 col-md-3">
-          <Card><p className="label-caps">Total Invoices</p><p className="kpi-value mt-1">{summary.invoiceCount}</p></Card>
-        </div>
+        <div className="col-6 col-md-3"><Card><p className="label-caps">Total Sales</p><p className="kpi-value mt-1">{formatCurrency(summary.totalSales)}</p></Card></div>
+        <div className="col-6 col-md-3"><Card><p className="label-caps">Total Received</p><p className="kpi-value mt-1 text-green-600">{formatCurrency(summary.totalReceived)}</p></Card></div>
+        <div className="col-6 col-md-3"><Card><p className="label-caps">Outstanding</p><p className={`kpi-value mt-1 ${summary.totalOutstanding > 0 ? 'text-amber-600' : 'text-green-600'}`}>{formatCurrency(summary.totalOutstanding)}</p></Card></div>
+        <div className="col-6 col-md-3"><Card><p className="label-caps">Invoices</p><p className="kpi-value mt-1">{summary.invoiceCount}</p></Card></div>
       </div>
 
-      {/* Tabs */}
       <Card padding={false}>
         <div className="flex gap-1 p-3 border-b app-border overflow-x-auto">
           {TABS.map((t) => (
             <button key={t} onClick={() => setTab(t)}
-              className={`px-4 py-2 text-sm rounded-lg whitespace-nowrap font-medium transition-colors ${tab === t ? 'bg-primary-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>
+              className={`px-4 py-2 text-sm rounded-lg whitespace-nowrap font-medium transition-colors ${tab === t ? 'bg-primary-600 text-white' : 'app-text-muted hover-surface'}`}>
               {t}
             </button>
           ))}
         </div>
 
-        <div className="p-5">
+        <div className="p-4 sm:p-5">
           {tab === 'Overview' && (
             <div className="space-y-5">
               <div className="row g-4">
                 <div className="col-12 col-md-6">
                   <h4 className="font-semibold text-sm mb-3">Customer Info</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between"><span className="text-slate-500">Phone</span><span>{customer.phone}</span></div>
-                    <div className="flex justify-between"><span className="text-slate-500">Email</span><span>{customer.email || '—'}</span></div>
-                    <div className="flex justify-between"><span className="text-slate-500">GST</span><span>{customer.gst || '—'}</span></div>
-                    <div className="flex justify-between"><span className="text-slate-500">State</span><span>{customer.state || '—'}</span></div>
-                    <div className="flex justify-between"><span className="text-slate-500">Address</span><span className="text-right max-w-[200px]">{customer.address || '—'}</span></div>
+                  <div className="space-y-2">
+                    <Row label="Phone" value={customer.phone} />
+                    <Row label="Email" value={customer.email} />
+                    <Row label="GST" value={customer.gst} />
+                    <Row label="State" value={customer.state} />
+                    <Row label="Address" value={customer.address} />
                   </div>
                 </div>
                 <div className="col-12 col-md-6">
                   <h4 className="font-semibold text-sm mb-3">Purchase Frequency</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between"><span className="text-slate-500">First Sale</span><span>{firstSale ? formatDate(firstSale.invoiceDate) : '—'}</span></div>
-                    <div className="flex justify-between"><span className="text-slate-500">Last Sale</span><span>{lastSale ? formatDate(lastSale.invoiceDate) : '—'}</span></div>
-                    <div className="flex justify-between"><span className="text-slate-500">Total Sales</span><span>{summary.invoiceCount}</span></div>
-                    <div className="flex justify-between"><span className="text-slate-500">This Month</span><span>{monthSales}</span></div>
-                    <div className="flex justify-between"><span className="text-slate-500">Last Payment</span><span>{summary.lastPayment ? formatDate(summary.lastPayment.paymentDate) : '—'}</span></div>
+                  <div className="space-y-2">
+                    <Row label="First Sale" value={firstSale ? formatDate(firstSale.invoiceDate) : null} />
+                    <Row label="Last Sale" value={summary.lastSale ? formatDate(summary.lastSale.invoiceDate) : null} />
+                    <Row label="Total Sales" value={summary.invoiceCount} />
+                    <Row label="This Month" value={monthSales} />
+                    <Row label="Last Payment" value={summary.lastPayment ? formatDate(summary.lastPayment.paymentDate) : null} />
                   </div>
                 </div>
               </div>
-
               {summary.totalOutstanding > 0 && (
                 <div>
                   <h4 className="font-semibold text-sm mb-3">Outstanding Aging</h4>
                   <div className="row g-2">
                     {Object.entries(aging).map(([bucket, amount]) => amount > 0 && (
-                      <div key={bucket} className="col-6 col-md-4 col-lg-2">
+                      <div key={bucket} className="col-6 col-sm-4 col-lg-2">
                         <div className="p-3 rounded-xl border app-border text-center">
-                          <p className="text-xs text-slate-500">{bucket}</p>
+                          <p className="text-xs app-text-muted">{bucket}</p>
                           <p className="font-semibold text-sm mt-1 text-amber-600">{formatCurrency(amount)}</p>
                         </div>
                       </div>
@@ -161,18 +155,15 @@ export default function CustomerDetail() {
               )}
             </div>
           )}
-
           {tab === 'Sales' && <DataTable columns={invoiceColumns} data={custInvoices} emptyMessage="No sales yet" />}
           {tab === 'Payments' && <DataTable columns={paymentColumns} data={custPayments} emptyMessage="No payments yet" />}
           {tab === 'Outstanding' && <DataTable columns={outstandingColumns} data={pendingInvoices} emptyMessage="No outstanding invoices" />}
           {tab === 'Ledger' && (
             <div>
-              <div className="flex justify-between items-center mb-4 text-sm">
-                <div className="space-x-4">
-                  <span>Total Sales: <strong>{formatCurrency(summary.totalSales)}</strong></span>
-                  <span>Total Received: <strong className="text-green-600">{formatCurrency(summary.totalReceived)}</strong></span>
-                  <span>Outstanding: <strong className="text-amber-600">{formatCurrency(summary.totalOutstanding)}</strong></span>
-                </div>
+              <div className="flex flex-wrap gap-3 mb-4 text-sm">
+                <span>Total Sales: <strong>{formatCurrency(summary.totalSales)}</strong></span>
+                <span>Received: <strong className="text-green-600">{formatCurrency(summary.totalReceived)}</strong></span>
+                <span>Outstanding: <strong className="text-amber-600">{formatCurrency(summary.totalOutstanding)}</strong></span>
               </div>
               <DataTable columns={ledgerColumns} data={ledger} emptyMessage="No transactions yet" />
             </div>

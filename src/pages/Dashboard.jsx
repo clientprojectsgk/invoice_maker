@@ -69,16 +69,16 @@ export default function Dashboard() {
       <div>
         <p className="label-caps mb-2">Today's Summary</p>
         <div className="row g-3">
-          <div className="col-6 col-xl-3">
+          <div className="col-md-3">
             <KPICard title="Today's Purchase" value={formatCurrency(stats.todayPurchases)} icon={HiOutlineShoppingCart} />
           </div>
-          <div className="col-6 col-xl-3">
+          <div className="col-md-3">
             <KPICard title="Today's Sales" value={formatCurrency(stats.todaySales)} icon={HiOutlineCurrencyRupee} />
           </div>
-          <div className="col-6 col-xl-3">
+          <div className="col-md-3">
             <KPICard title="Today's Collection" value={formatCurrency(stats.todayPaymentsReceived)} icon={HiOutlineCash} />
           </div>
-          <div className="col-6 col-xl-3">
+          <div className="col-md-3">
             <KPICard title="Today's Supplier Payment" value={formatCurrency(stats.todaySupplierPayments)} icon={HiOutlineCreditCard} />
           </div>
         </div>
@@ -88,27 +88,27 @@ export default function Dashboard() {
       <div>
         <p className="label-caps mb-2">Outstanding</p>
         <div className="row g-3">
-          <div className="col-6 col-md-3">
+          <div className="col-md-3">
             <Card>
               <p className="label-caps">Customer Receivable</p>
               <p className="kpi-value mt-1 text-amber-600">{formatCurrency(stats.totalReceivables)}</p>
               <Link to="/receivables" className="text-xs text-primary-600 hover:underline mt-1 block">View details →</Link>
             </Card>
           </div>
-          <div className="col-6 col-md-3">
+          <div className="col-md-3">
             <Card>
               <p className="label-caps">Supplier Payable</p>
               <p className="kpi-value mt-1 text-red-600">{formatCurrency(stats.totalPayables)}</p>
               <Link to="/payables" className="text-xs text-primary-600 hover:underline mt-1 block">View details →</Link>
             </Card>
           </div>
-          <div className="col-6 col-md-3">
+          <div className="col-md-3">
             <Card>
               <p className="label-caps">Total Sales</p>
               <p className="kpi-value mt-1">{formatCurrency(stats.totalSales)}</p>
             </Card>
           </div>
-          <div className="col-6 col-md-3">
+          <div className="col-md-3">
             <Card>
               <p className="label-caps">Total Purchases</p>
               <p className="kpi-value mt-1">{formatCurrency(stats.totalPurchases)}</p>
@@ -121,26 +121,26 @@ export default function Dashboard() {
       <div>
         <p className="label-caps mb-2">Inventory</p>
         <div className="row g-3">
-          <div className="col-6 col-md-3">
+          <div className="col-md-3">
             <Card>
               <p className="label-caps">Low Stock Items</p>
               <p className={`kpi-value mt-1 ${stats.lowStockCount > 0 ? 'text-amber-600' : 'text-green-600'}`}>{stats.lowStockCount}</p>
               <Link to="/stock" className="text-xs text-primary-600 hover:underline mt-1 block">View stock →</Link>
             </Card>
           </div>
-          <div className="col-6 col-md-3">
+          <div className="col-md-3">
             <Card>
               <p className="label-caps">Out of Stock</p>
               <p className={`kpi-value mt-1 ${stats.outOfStockCount > 0 ? 'text-red-600' : 'text-green-600'}`}>{stats.outOfStockCount}</p>
             </Card>
           </div>
-          <div className="col-6 col-md-3">
+          <div className="col-md-3">
             <Card>
               <p className="label-caps">Partial Invoices</p>
               <p className="kpi-value mt-1 text-amber-600">{stats.partialInvoices}</p>
             </Card>
           </div>
-          <div className="col-6 col-md-3">
+          <div className="col-md-3">
             <Card>
               <p className="label-caps">Overdue Customers</p>
               <p className={`kpi-value mt-1 ${stats.overdueCustomers?.length > 0 ? 'text-red-600' : 'text-green-600'}`}>{stats.overdueCustomers?.length || 0}</p>
@@ -150,7 +150,7 @@ export default function Dashboard() {
       </div>
 
       {/* Alerts */}
-      {(stats.overdueCustomers?.length > 0 || stats.lowStockCount > 0 || stats.outOfStockCount > 0) && (
+      {/* {(stats.overdueCustomers?.length > 0 || stats.lowStockCount > 0 || stats.outOfStockCount > 0) && (
         <Card className="border-amber-200 bg-amber-50 dark:bg-amber-900/10">
           <div className="flex items-start gap-3">
             <HiOutlineExclamation className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
@@ -168,10 +168,10 @@ export default function Dashboard() {
             </div>
           </div>
         </Card>
-      )}
+      )} */}
 
       {/* Charts + Quick Actions */}
-      <div className="row g-3">
+      {/* <div className="row g-3">
         <div className="col-12 col-lg-8">
           <Card>
             <CardHeader title="Sales & Purchase Trend" subtitle="Last 12 months" />
@@ -184,7 +184,7 @@ export default function Dashboard() {
             <InvoiceStatusChart invoices={invoices} />
           </Card>
         </div>
-      </div>
+      </div> */}
 
       {/* Quick Actions + Activity */}
       <div className="row g-3">

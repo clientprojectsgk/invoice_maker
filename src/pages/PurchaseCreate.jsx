@@ -83,7 +83,7 @@ export default function PurchaseCreate() {
           <div className="col-12 col-lg-8 space-y-4">
             {/* Purchase Info */}
             <Card>
-              <h4 className="font-semibold mb-4 text-sm text-slate-600 uppercase tracking-wide">Purchase Information</h4>
+              <h4 className="font-semibold mb-4 text-sm app-text-muted uppercase tracking-wide">Purchase Information</h4>
               <div className="row g-3">
                 <div className="col-12 col-md-4">
                   <FormField label="Purchase Date" required>
@@ -120,14 +120,14 @@ export default function PurchaseCreate() {
             {/* Products */}
             <Card>
               <div className="flex items-center justify-between mb-4">
-                <h4 className="font-semibold text-sm text-slate-600 uppercase tracking-wide">Products</h4>
+                <h4 className="font-semibold text-sm app-text-muted uppercase tracking-wide">Products</h4>
                 <Button type="button" size="sm" icon={HiOutlinePlus} onClick={addItem}>Add Product</Button>
               </div>
               <div className="space-y-4">
                 {items.map((item, idx) => (
-                  <div key={idx} className="p-3 rounded-xl border app-border bg-slate-50 dark:bg-slate-800/40">
+                  <div key={idx} className="p-3 rounded-xl border app-border" style={{backgroundColor:'var(--app-surface-hover)'}}>
                     <div className="flex justify-between items-center mb-3">
-                      <span className="text-xs font-semibold text-slate-500">Item {idx + 1}</span>
+                      <span className="text-xs font-semibold app-text-muted">Item {idx + 1}</span>
                       {items.length > 1 && (
                         <button type="button" onClick={() => removeItem(idx)} className="p-1 rounded hover:bg-red-50 text-red-500">
                           <HiOutlineTrash className="w-4 h-4" />
@@ -192,7 +192,7 @@ export default function PurchaseCreate() {
 
             {/* Charges & Payment */}
             <Card>
-              <h4 className="font-semibold mb-4 text-sm text-slate-600 uppercase tracking-wide">Charges & Payment</h4>
+              <h4 className="font-semibold mb-4 text-sm app-text-muted uppercase tracking-wide">Charges & Payment</h4>
               <div className="row g-3">
                 <div className="col-12 col-md-3">
                   <FormField label="Transportation Cost">
@@ -228,23 +228,23 @@ export default function PurchaseCreate() {
             <Card className="sticky top-4">
               <h4 className="font-semibold mb-4">Purchase Summary</h4>
               {selectedSupplier && (
-                <div className="mb-4 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/40 text-sm">
+                <div className="mb-4 p-3 rounded-lg border app-border text-sm" style={{backgroundColor:'var(--app-surface-hover)'}}>
                   <p className="font-medium">{selectedSupplier.name}</p>
                   <p className="text-slate-500 text-xs">{selectedSupplier.phone}</p>
                 </div>
               )}
               <div className="space-y-2 text-sm mb-4">
                 {items.filter((i) => i.productId && i.qty).map((item, idx) => (
-                  <div key={idx} className="flex justify-between text-slate-600">
+                  <div key={idx} className="flex justify-between app-text-muted">
                     <span>{item.product || 'Product'} ({item.qty} {item.unit})</span>
                     <span>{formatCurrency(getItemTotal(item))}</span>
                   </div>
                 ))}
               </div>
-              <div className="space-y-2 text-sm border-t pt-3">
-                <div className="flex justify-between"><span className="text-slate-500">Products Total</span><span>{formatCurrency(amounts.totalAmount)}</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Transport</span><span>{formatCurrency(form.transportationCost)}</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Other Expenses</span><span>{formatCurrency(form.otherExpenses)}</span></div>
+              <div className="space-y-2 text-sm border-t app-border pt-3">
+                <div className="flex justify-between"><span className="app-text-muted">Products Total</span><span>{formatCurrency(amounts.totalAmount)}</span></div>
+                <div className="flex justify-between"><span className="app-text-muted">Transport</span><span>{formatCurrency(form.transportationCost)}</span></div>
+                <div className="flex justify-between"><span className="app-text-muted">Other Expenses</span><span>{formatCurrency(form.otherExpenses)}</span></div>
                 <div className="flex justify-between font-bold text-base border-t pt-2"><span>Final Amount</span><span className="text-primary-600">{formatCurrency(amounts.finalAmount)}</span></div>
                 <div className="flex justify-between text-green-600"><span>Amount Paid</span><span>{formatCurrency(form.amountPaid)}</span></div>
                 <div className="flex justify-between text-amber-600 font-medium"><span>Amount Pending</span><span>{formatCurrency(amounts.amountPending)}</span></div>

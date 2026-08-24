@@ -150,7 +150,7 @@ export default function PurchasePayments() {
                       <div key={pur.id} className="flex items-center gap-3 text-sm">
                         <div className="flex-1">
                           <span className="font-medium text-primary-600">{pur.purchaseNumber}</span>
-                          <span className="text-slate-500 ml-2">{formatDate(pur.purchaseDate)}</span>
+                          <span className="app-text-muted ml-2">{formatDate(pur.purchaseDate)}</span>
                           <span className="text-amber-600 ml-2">Pending: {formatCurrency(pending)}</span>
                         </div>
                         <Input
