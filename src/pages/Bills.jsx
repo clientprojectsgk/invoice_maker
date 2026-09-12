@@ -25,16 +25,21 @@ export default function Bills() {
   const { sortedData, sortKey, sortDir, toggleSort } = useSort(tabFiltered, 'billDate');
   const { currentPage, totalPages, paginatedData, perPage, setPerPage, goToPage, totalItems } = usePagination(sortedData);
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     const supplier = suppliers.find((s) => s.id === data.supplierId);
-    addBill({ ...data, amount: Number(data.amount), gst: Number(data.gst || 0), supplierName: supplier?.name || data.supplierName });
-    Swal.fire('Created!', 'Bill added successfully.', 'success');
-    setModalOpen(false);
+    try {
+      await addBill({ ...data, amount: Number(data.amount), gst: Number(data.gst || 0), supplierName: supplier?.name || data.supplierName });
+      Swal.fire('Created!', 'Bill added successfully.', 'success');
+      setModalOpen(false);
+    } catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
   };
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({ title: 'Delete Bill?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#2563EB' });
-    if (result.isConfirmed) { deleteBill(id); Swal.fire('Deleted!', '', 'success'); }
+    if (result.isConfirmed) {
+      try { await deleteBill(id); Swal.fire('Deleted!', '', 'success'); }
+      catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
+    }
   };
 
   const columns = [

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { HiOutlineArrowLeft, HiOutlinePlus, HiOutlineTrash, HiOutlineChevronLeft, HiOutlineChevronRight } from 'react-icons/hi';
 import Swal from 'sweetalert2';
@@ -34,6 +34,8 @@ const calBg = {
   holiday: 'bg-slate-100 dark:bg-slate-700/60 border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400',
 };
 
+const EMPTY_EARNINGS = { presentDays: 0, halfDays: 0, overtimeHours: 0, earned: 0, paid: 0, balance: 0, totalDays: 0 };
+
 export default function LabourDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -50,14 +52,31 @@ export default function LabourDetail() {
   const [bulkNotes, setBulkNotes] = useState('');
 
   const labour = labours.find((l) => l.id === id);
-  if (!labour) return <div className="p-8 text-center app-text-muted">Labour not found. <Link to="/labours" className="text-primary-600">Go back</Link></div>;
+  const [earnings, setEarnings] = useState(EMPTY_EARNINGS);
+  const [monthEarnings, setMonthEarnings] = useState(EMPTY_EARNINGS);
 
-  const earnings = getLabourEarnings(id);
-  const monthEarnings = getLabourEarnings(id, calMonth.format('YYYY-MM-DD'), calMonth.endOf('month').format('YYYY-MM-DD'));
+  const loadEarnings = useCallback(async () => {
+    if (!id) return;
+    try {
+      const monthFrom = calMonth.format('YYYY-MM-DD');
+      const monthTo = calMonth.endOf('month').format('YYYY-MM-DD');
+      const [all, month] = await Promise.all([
+        getLabourEarnings(id),
+        getLabourEarnings(id, monthFrom, monthTo),
+      ]);
+      setEarnings(all || EMPTY_EARNINGS);
+      setMonthEarnings(month || EMPTY_EARNINGS);
+    } catch {
+      setEarnings(EMPTY_EARNINGS);
+      setMonthEarnings(EMPTY_EARNINGS);
+    }
+  }, [id, calMonth, getLabourEarnings]);
 
+  useEffect(() => { loadEarnings(); }, [loadEarnings, attendances, labourPayments]);
+
+  const monthStr = calMonth.format('YYYY-MM');
   const daysInMonth = calMonth.daysInMonth();
   const firstDayOfWeek = calMonth.day();
-  const monthStr = calMonth.format('YYYY-MM');
 
   const attendanceMap = useMemo(() => {
     const map = {};
@@ -76,32 +95,47 @@ export default function LabourDetail() {
       confirmButtonColor: '#1a5fb8',
       confirmButtonText: 'Mark',
     });
-    if (status) markAttendance(id, dateStr, status, existing?.overtimeHours || 0, existing?.notes || '');
+    if (status) {
+      try {
+        await markAttendance(id, dateStr, status, existing?.overtimeHours || 0, existing?.notes || '');
+        await loadEarnings();
+      } catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
+    }
   };
 
-  const handleMarkBulk = () => {
-    markAttendance(id, bulkDate, bulkStatus, Number(bulkOT) || 0, bulkNotes);
-    Swal.fire('Marked!', `${formatDate(bulkDate)} — ${bulkStatus}`, 'success');
-    setBulkModal(false);
-    setBulkOT(''); setBulkNotes('');
+  const handleMarkBulk = async () => {
+    try {
+      await markAttendance(id, bulkDate, bulkStatus, Number(bulkOT) || 0, bulkNotes);
+      await loadEarnings();
+      Swal.fire('Marked!', `${formatDate(bulkDate)} — ${bulkStatus}`, 'success');
+      setBulkModal(false);
+      setBulkOT(''); setBulkNotes('');
+    } catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
   };
 
-  const handlePay = () => {
+  const handlePay = async () => {
     if (!payForm.amount) { Swal.fire('Error', 'Enter amount', 'error'); return; }
-    addLabourPayment({ ...payForm, labourId: id, labourName: labour.name, amount: Number(payForm.amount) });
-    Swal.fire('Payment Recorded!', '', 'success');
-    setPayModal(false);
-    setPayForm({ amount: '', paymentMode: 'cash', referenceNumber: '', notes: '', paymentDate: dayjs().format('YYYY-MM-DD') });
+    try {
+      await addLabourPayment({ ...payForm, labourId: id, labourName: labour.name, amount: Number(payForm.amount) });
+      await loadEarnings();
+      Swal.fire('Payment Recorded!', '', 'success');
+      setPayModal(false);
+      setPayForm({ amount: '', paymentMode: 'cash', referenceNumber: '', notes: '', paymentDate: dayjs().format('YYYY-MM-DD') });
+    } catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
   };
 
   const handleDeletePayment = async (pid) => {
     const r = await Swal.fire({ title: 'Delete Payment?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#1a5fb8' });
-    if (r.isConfirmed) { deleteLabourPayment(pid); Swal.fire('Deleted', '', 'success'); }
+    if (r.isConfirmed) {
+      try { await deleteLabourPayment(pid); await loadEarnings(); Swal.fire('Deleted', '', 'success'); }
+      catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
+    }
   };
 
   const myPayments = labourPayments.filter((p) => p.labourId === id).sort((a, b) => b.paymentDate.localeCompare(a.paymentDate));
 
   const ledger = useMemo(() => {
+    if (!labour) return [];
     const entries = [];
     const rate = Number(labour.dailyWage) || 0;
     const otRate = Number(labour.overtimeRate) || rate / 8;
@@ -149,6 +183,10 @@ export default function LabourDetail() {
   for (let d = 1; d <= daysInMonth; d++) {
     const dateStr = `${monthStr}-${String(d).padStart(2, '0')}`;
     calendarCells.push({ day: d, dateStr, record: attendanceMap[dateStr] });
+  }
+
+  if (!labour) {
+    return <div className="p-8 text-center app-text-muted">Labour not found. <Link to="/labours" className="text-primary-600">Go back</Link></div>;
   }
 
   return (
@@ -359,7 +397,7 @@ export default function LabourDetail() {
           </div>
           <div className="col-12 col-sm-6">
             <FormField label="Amount (₹)" required>
-              <Input type="number" min="0" step="0.01" value={payForm.amount} onChange={(e) => setPayForm((p) => ({ ...p, amount: e.target.value }))} placeholder={`Max: ${earnings.balance.toFixed(2)}`} />
+              <Input type="number" min="0" step="0.01" value={payForm.amount} onChange={(e) => setPayForm((p) => ({ ...p, amount: e.target.value }))} placeholder={`Max: ${(earnings.balance ?? 0).toFixed(2)}`} />
             </FormField>
           </div>
           <div className="col-12 col-sm-6">

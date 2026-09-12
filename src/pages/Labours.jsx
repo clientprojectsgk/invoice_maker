@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineEye } from 'react-icons/hi';
 import { useForm } from 'react-hook-form';
@@ -17,6 +17,7 @@ import { formatCurrency, formatDate } from '../utils/formatters';
 
 const ROLES = ['Loading', 'Unloading', 'Sorting', 'Packing', 'Driver', 'Helper', 'Supervisor', 'Other'];
 const STATUS_OPTS = [{ value: 'active', label: 'Active' }, { value: 'inactive', label: 'Inactive' }];
+const EMPTY_EARNINGS = { presentDays: 0, halfDays: 0, overtimeHours: 0, earned: 0, paid: 0, balance: 0, totalDays: 0 };
 
 export default function Labours() {
   const { labours, addLabour, updateLabour, deleteLabour, getLabourEarnings } = useApp();
@@ -27,23 +28,50 @@ export default function Labours() {
   const { search, setSearch, filteredData } = useFilter(labours);
   const { sortedData, sortKey, sortDir, toggleSort } = useSort(filteredData, 'name');
   const { currentPage, totalPages, paginatedData, perPage, setPerPage, goToPage, totalItems } = usePagination(sortedData);
+  const [earningsMap, setEarningsMap] = useState({});
+
+  useEffect(() => {
+    if (!labours.length) { setEarningsMap({}); return; }
+    let cancelled = false;
+    (async () => {
+      const entries = await Promise.all(
+        labours.map(async (l) => {
+          try {
+            const e = await getLabourEarnings(l.id);
+            return [l.id, e || EMPTY_EARNINGS];
+          } catch {
+            return [l.id, EMPTY_EARNINGS];
+          }
+        })
+      );
+      if (!cancelled) setEarningsMap(Object.fromEntries(entries));
+    })();
+    return () => { cancelled = true; };
+  }, [labours, getLabourEarnings]);
+
+  const earningsFor = (labourId) => earningsMap[labourId] || EMPTY_EARNINGS;
 
   const openAdd = () => { setEditing(null); reset({ status: 'active', dailyWage: '', overtimeRate: '' }); setModalOpen(true); };
   const openEdit = (l) => { setEditing(l); reset(l); setModalOpen(true); };
 
-  const onSubmit = (data) => {
-    if (editing) { updateLabour(editing.id, data); Swal.fire('Updated!', '', 'success'); }
-    else { addLabour(data); Swal.fire('Added!', 'Labour added successfully.', 'success'); }
-    setModalOpen(false);
+  const onSubmit = async (data) => {
+    try {
+      if (editing) { await updateLabour(editing.id, data); Swal.fire('Updated!', '', 'success'); }
+      else { await addLabour(data); Swal.fire('Added!', 'Labour added successfully.', 'success'); }
+      setModalOpen(false);
+    } catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
   };
 
   const handleDelete = async (id) => {
     const r = await Swal.fire({ title: 'Delete Labour?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#1a5fb8' });
-    if (r.isConfirmed) { deleteLabour(id); Swal.fire('Deleted!', '', 'success'); }
+    if (r.isConfirmed) {
+      try { await deleteLabour(id); Swal.fire('Deleted!', '', 'success'); }
+      catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
+    }
   };
 
   const activeCount = labours.filter((l) => l.status === 'active').length;
-  const totalBalance = labours.reduce((s, l) => s + getLabourEarnings(l.id).balance, 0);
+  const totalBalance = labours.reduce((s, l) => s + (earningsFor(l.id).balance ?? 0), 0);
 
   const columns = [
     { key: 'name', label: 'Name', sortable: true, render: (r) => (
@@ -52,10 +80,10 @@ export default function Labours() {
     { key: 'phone', label: 'Phone' },
     { key: 'role', label: 'Role', render: (r) => r.role || '—' },
     { key: 'dailyWage', label: 'Daily Wage', render: (r) => formatCurrency(r.dailyWage) },
-    { key: 'earned', label: 'Total Earned', render: (r) => formatCurrency(getLabourEarnings(r.id).earned) },
-    { key: 'paid', label: 'Total Paid', render: (r) => <span className="text-green-600">{formatCurrency(getLabourEarnings(r.id).paid)}</span> },
+    { key: 'earned', label: 'Total Earned', render: (r) => formatCurrency(earningsFor(r.id).earned) },
+    { key: 'paid', label: 'Total Paid', render: (r) => <span className="text-green-600">{formatCurrency(earningsFor(r.id).paid)}</span> },
     { key: 'balance', label: 'Balance Due', render: (r) => {
-      const b = getLabourEarnings(r.id).balance;
+      const b = earningsFor(r.id).balance ?? 0;
       return <span className={b > 0 ? 'text-amber-600 font-medium' : 'text-green-600'}>{formatCurrency(b)}</span>;
     }},
     { key: 'status', label: 'Status', render: (r) => (
@@ -82,7 +110,7 @@ export default function Labours() {
           <Card><p className="label-caps">Active</p><p className="kpi-value mt-1 text-green-600">{activeCount}</p></Card>
         </div>
         <div className="col-6 col-md-3">
-          <Card><p className="label-caps">Total Wages Earned</p><p className="kpi-value mt-1">{formatCurrency(labours.reduce((s, l) => s + getLabourEarnings(l.id).earned, 0))}</p></Card>
+          <Card><p className="label-caps">Total Wages Earned</p><p className="kpi-value mt-1">{formatCurrency(labours.reduce((s, l) => s + (earningsFor(l.id).earned ?? 0), 0))}</p></Card>
         </div>
         <div className="col-6 col-md-3">
           <Card><p className="label-caps">Total Balance Due</p><p className={`kpi-value mt-1 ${totalBalance > 0 ? 'text-amber-600' : 'text-green-600'}`}>{formatCurrency(totalBalance)}</p></Card>

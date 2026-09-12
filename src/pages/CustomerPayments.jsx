@@ -53,17 +53,22 @@ export default function CustomerPayments() {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.customerId || !form.amount) { Swal.fire('Error', 'Select customer and enter amount', 'error'); return; }
     const customer = customers.find((c) => c.id === form.customerId);
-    addCustomerPayment({ ...form, customerName: customer?.name, amount: Number(form.amount), allocations });
-    Swal.fire('Payment Recorded!', '', 'success');
-    setModalOpen(false);
+    try {
+      await addCustomerPayment({ ...form, customerName: customer?.name, amount: Number(form.amount), allocations });
+      Swal.fire('Payment Recorded!', '', 'success');
+      setModalOpen(false);
+    } catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
   };
 
   const handleCancel = async (id) => {
     const r = await Swal.fire({ title: 'Cancel Payment?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#1a5fb8' });
-    if (r.isConfirmed) { cancelCustomerPayment(id); Swal.fire('Cancelled', '', 'success'); }
+    if (r.isConfirmed) {
+      try { await cancelCustomerPayment(id); Swal.fire('Cancelled', '', 'success'); }
+      catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
+    }
   };
 
   const columns = [

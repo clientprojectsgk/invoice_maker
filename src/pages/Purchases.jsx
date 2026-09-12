@@ -25,7 +25,10 @@ export default function Purchases() {
 
   const handleCancel = async (id) => {
     const result = await Swal.fire({ title: 'Cancel Purchase?', text: 'Stock will be reversed.', icon: 'warning', showCancelButton: true, confirmButtonColor: '#1a5fb8' });
-    if (result.isConfirmed) { cancelPurchase(id); Swal.fire('Cancelled', '', 'success'); }
+    if (result.isConfirmed) {
+      try { await cancelPurchase(id); Swal.fire('Cancelled', '', 'success'); }
+      catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
+    }
   };
 
   const columns = [

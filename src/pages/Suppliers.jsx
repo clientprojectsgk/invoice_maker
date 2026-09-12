@@ -29,15 +29,20 @@ export default function Suppliers() {
   const openAdd = () => { setEditing(null); reset({}); setModalOpen(true); };
   const openEdit = (s) => { setEditing(s); reset(s); setModalOpen(true); };
 
-  const onSubmit = (data) => {
-    if (editing) { updateSupplier(editing.id, data); Swal.fire('Updated!', '', 'success'); }
-    else { addSupplier(data); Swal.fire('Created!', '', 'success'); }
-    setModalOpen(false);
+  const onSubmit = async (data) => {
+    try {
+      if (editing) { await updateSupplier(editing.id, data); Swal.fire('Updated!', '', 'success'); }
+      else { await addSupplier(data); Swal.fire('Created!', '', 'success'); }
+      setModalOpen(false);
+    } catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
   };
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({ title: 'Delete Supplier?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#2563EB' });
-    if (result.isConfirmed) { deleteSupplier(id); Swal.fire('Deleted!', '', 'success'); }
+    if (result.isConfirmed) {
+      try { await deleteSupplier(id); Swal.fire('Deleted!', '', 'success'); }
+      catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
+    }
   };
 
   const columns = [

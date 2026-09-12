@@ -54,13 +54,13 @@ export default function PurchaseCreate() {
   const amounts = calcPurchaseAmounts({ ...form, items });
   const selectedSupplier = suppliers.find((s) => s.id === form.supplierId);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.supplierId) { Swal.fire('Error', 'Select a supplier', 'error'); return; }
     const validItems = items.filter((i) => i.productId && i.qty && i.purchaseRate);
     if (validItems.length === 0) { Swal.fire('Error', 'Add at least one product with qty and rate', 'error'); return; }
     try {
-      const purchase = addPurchase({
+      const purchase = await addPurchase({
         ...form,
         items: validItems.map((i) => ({ ...i, qty: Number(i.qty), purchaseRate: Number(i.purchaseRate) })),
         supplierName: selectedSupplier?.name,

@@ -15,10 +15,18 @@ import Button from '../components/common/Button';
 import DataTable from '../components/common/DataTable';
 
 export default function Dashboard() {
-  const { getDashboardStats, invoices, purchases, activities, computeInvoiceStatus, getInvoicePending } = useApp();
+  const { getDashboardStats, invoices, purchases, activities, computeInvoiceStatus, getInvoicePending, loading, initialized } = useApp();
   const [stats, setStats] = useState(null);
 
-  useEffect(() => { setStats(getDashboardStats()); }, [getDashboardStats]);
+  useEffect(() => { setStats(getDashboardStats()); }, [getDashboardStats, invoices, purchases]);
+
+  if (loading && !initialized) {
+    return (
+      <div className="flex items-center justify-center min-h-[40vh]">
+        <p className="app-text-muted">Loading dashboard...</p>
+      </div>
+    );
+  }
 
   if (!stats) return null;
 

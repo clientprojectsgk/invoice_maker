@@ -15,9 +15,13 @@ export default function Settings() {
   const [form, setForm] = useState({ ...settings });
   const update = (field, value) => setForm((prev) => ({ ...prev, [field]: value }));
 
-  const handleSave = () => {
-    setSettings(form);
-    Swal.fire('Saved!', 'Settings updated successfully.', 'success');
+  const handleSave = async () => {
+    try {
+      await setSettings(form);
+      Swal.fire('Saved!', 'Settings updated successfully.', 'success');
+    } catch (err) {
+      Swal.fire('Error', err.message || 'Failed to save settings', 'error');
+    }
   };
 
   const handleBackup = () => {

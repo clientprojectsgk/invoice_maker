@@ -27,16 +27,21 @@ export default function Products() {
   const openAdd = () => { setEditing(null); reset({ unit: 'Nos', gst: 18, status: 'active', stock: 0, minStock: 5 }); setModalOpen(true); };
   const openEdit = (p) => { setEditing(p); reset(p); setModalOpen(true); };
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     const parsed = { ...data, purchasePrice: Number(data.purchasePrice), sellingPrice: Number(data.sellingPrice), gst: Number(data.gst), stock: Number(data.stock), minStock: Number(data.minStock) };
-    if (editing) { updateProduct(editing.id, parsed); Swal.fire('Updated!', '', 'success'); }
-    else { addProduct(parsed); Swal.fire('Created!', '', 'success'); }
-    setModalOpen(false);
+    try {
+      if (editing) { await updateProduct(editing.id, parsed); Swal.fire('Updated!', '', 'success'); }
+      else { await addProduct(parsed); Swal.fire('Created!', '', 'success'); }
+      setModalOpen(false);
+    } catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
   };
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({ title: 'Delete Product?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#2563EB' });
-    if (result.isConfirmed) { deleteProduct(id); Swal.fire('Deleted!', '', 'success'); }
+    if (result.isConfirmed) {
+      try { await deleteProduct(id); Swal.fire('Deleted!', '', 'success'); }
+      catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
+    }
   };
 
   const handleExport = () => {

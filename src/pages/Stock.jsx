@@ -29,15 +29,17 @@ export default function Stock() {
   });
   const outOfStock = products.filter((p) => getProductStock(p.id) <= 0);
 
-  const handleAdjust = () => {
+  const handleAdjust = async () => {
     if (!adjustForm.productId || !adjustForm.qty) {
       Swal.fire('Error', 'Select product and quantity', 'error');
       return;
     }
-    adjustStock(adjustForm.productId, Number(adjustForm.qty), adjustForm.type, adjustForm.notes);
-    Swal.fire('Stock Adjusted', '', 'success');
-    setAdjustModal(false);
-    setAdjustForm({ productId: '', type: 'in', qty: '', notes: '' });
+    try {
+      await adjustStock(adjustForm.productId, Number(adjustForm.qty), adjustForm.type, adjustForm.notes);
+      Swal.fire('Stock Adjusted', '', 'success');
+      setAdjustModal(false);
+      setAdjustForm({ productId: '', type: 'in', qty: '', notes: '' });
+    } catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
   };
 
   const productColumns = [

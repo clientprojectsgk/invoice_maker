@@ -53,17 +53,22 @@ export default function PurchasePayments() {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.supplierId || !form.amount) { Swal.fire('Error', 'Select supplier and enter amount', 'error'); return; }
     const supplier = suppliers.find((s) => s.id === form.supplierId);
-    addSupplierPayment({ ...form, supplierName: supplier?.name, amount: Number(form.amount), allocations });
-    Swal.fire('Payment Recorded!', '', 'success');
-    setModalOpen(false);
+    try {
+      await addSupplierPayment({ ...form, supplierName: supplier?.name, amount: Number(form.amount), allocations });
+      Swal.fire('Payment Recorded!', '', 'success');
+      setModalOpen(false);
+    } catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
   };
 
   const handleCancel = async (id) => {
     const r = await Swal.fire({ title: 'Cancel Payment?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#1a5fb8' });
-    if (r.isConfirmed) { cancelSupplierPayment(id); Swal.fire('Cancelled', '', 'success'); }
+    if (r.isConfirmed) {
+      try { await cancelSupplierPayment(id); Swal.fire('Cancelled', '', 'success'); }
+      catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
+    }
   };
 
   const columns = [

@@ -89,16 +89,20 @@ export default function InvoiceCreate() {
     return () => clearInterval(interval);
   }, [saveDraft]);
 
-  const handleSubmit = (status = 'sent') => {
-    const invoice = addInvoice({ ...form, isInterState, status, totals });
-    Swal.fire({
-      title: 'Invoice Created!',
-      text: `${invoice.invoiceNumber} — Choose a format to preview & download`,
-      icon: 'success',
-      confirmButtonColor: '#1a5fb8',
-    });
-    localStorage.removeItem('ip_invoice_draft');
-    navigate(`/invoices/${invoice.id}`, { state: { format: 'tally', justCreated: true } });
+  const handleSubmit = async (status = 'sent') => {
+    try {
+      const invoice = await addInvoice({ ...form, isInterState, status, totals });
+      Swal.fire({
+        title: 'Invoice Created!',
+        text: `${invoice.invoiceNumber} — Choose a format to preview & download`,
+        icon: 'success',
+        confirmButtonColor: '#1a5fb8',
+      });
+      localStorage.removeItem('ip_invoice_draft');
+      navigate(`/invoices/${invoice.id}`, { state: { format: 'tally', justCreated: true } });
+    } catch (err) {
+      Swal.fire('Error', err.message || 'Failed to create invoice', 'error');
+    }
   };
 
   const renderStep = () => {

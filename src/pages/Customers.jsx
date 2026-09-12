@@ -29,15 +29,20 @@ export default function Customers() {
   const openAdd = () => { setEditing(null); reset({}); setModalOpen(true); };
   const openEdit = (c) => { setEditing(c); reset(c); setModalOpen(true); };
 
-  const onSubmit = (data) => {
-    if (editing) { updateCustomer(editing.id, data); Swal.fire('Updated!', 'Customer updated successfully.', 'success'); }
-    else { addCustomer(data); Swal.fire('Created!', 'Customer added successfully.', 'success'); }
-    setModalOpen(false);
+  const onSubmit = async (data) => {
+    try {
+      if (editing) { await updateCustomer(editing.id, data); Swal.fire('Updated!', 'Customer updated successfully.', 'success'); }
+      else { await addCustomer(data); Swal.fire('Created!', 'Customer added successfully.', 'success'); }
+      setModalOpen(false);
+    } catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
   };
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({ title: 'Delete Customer?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#1a5fb8' });
-    if (result.isConfirmed) { deleteCustomer(id); Swal.fire('Deleted!', '', 'success'); }
+    if (result.isConfirmed) {
+      try { await deleteCustomer(id); Swal.fire('Deleted!', '', 'success'); }
+      catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
+    }
   };
 
   const columns = [

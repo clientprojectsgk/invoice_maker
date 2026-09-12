@@ -25,8 +25,11 @@ export default function Invoices() {
   const { currentPage, totalPages, paginatedData, perPage, setPerPage, goToPage, totalItems } = usePagination(sortedData);
 
   const handleDelete = async (id) => {
-    const result = await Swal.fire({ title: 'Delete Invoice?', text: 'You can undo this action', icon: 'warning', showCancelButton: true, confirmButtonColor: '#1a5fb8' });
-    if (result.isConfirmed) { deleteInvoice(id); Swal.fire('Deleted!', 'Invoice has been deleted.', 'success'); }
+    const result = await Swal.fire({ title: 'Delete Invoice?', text: 'This cannot be undone', icon: 'warning', showCancelButton: true, confirmButtonColor: '#1a5fb8' });
+    if (result.isConfirmed) {
+      try { await deleteInvoice(id); Swal.fire('Deleted!', 'Invoice has been deleted.', 'success'); }
+      catch (err) { Swal.fire('Error', err.message || 'Request failed', 'error'); }
+    }
   };
 
   const columns = [
